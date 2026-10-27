@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#080b14">
+  <meta name="description" content="Squirrel Doc: herramientas de archivos locales, rápidas y privadas.">
+  <title>Squirrel Doc — Herramientas de archivos</title>
+  <link rel="icon" href="assets/mascot.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="assets/mascot.png" alt="Mascota de Squirrel Doc">
+        <div><div class="brand-name">Squirrel<span>Doc</span></div><div class="brand-caption">LOCAL FILE WORKSPACE</div></div>
+      </div>
+      <nav aria-label="Navegación principal">
+        <button class="nav-item active" data-view="inicio"><span>⌂</span> Inicio</button>
+        <button class="nav-item" data-view="convertir"><span>⇄</span> Convertir imágenes</button>
+        <button class="nav-item" data-view="archivos"><span>▤</span> Información de archivos</button>
+        <button class="nav-item" data-view="hash"><span>◇</span> Calcular hashes</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="privacy-mark"><span class="pulse"></span> PROCESAMIENTO LOCAL</div>
+        <p>Los archivos se procesan en tu navegador. No se suben a un servidor mediante esta aplicación.</p>
+        <small>Prototipo web · v0.1.0</small>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div><div class="eyebrow">TU ESPACIO DE TRABAJO</div><h1 id="page-title">Herramientas para tus archivos.</h1><p id="page-subtitle">Convierte y revisa archivos desde una interfaz simple, rápida y privada.</p></div>
+        <div class="top-badge"><span class="badge-dot"></span> Sin cuenta · Local</div>
+      </header>
+
+      <section class="drop-zone" id="drop-zone" tabindex="0" role="button" aria-label="Seleccionar o arrastrar archivos">
+        <div class="drop-icon">⇩</div>
+        <h2>Arrastra tus archivos aquí</h2>
+        <p>o selecciónalos desde tu equipo</p>
+        <button class="btn btn-primary" id="select-files">Seleccionar archivos</button>
+        <input id="file-input" type="file" multiple hidden>
+        <div class="drop-hint">Puedes seleccionar varios archivos a la vez</div>
+      </section>
+
+      <section class="quick-grid" aria-label="Herramientas rápidas">
+        <button class="tool-card cyan" data-view="convertir"><span class="tool-icon">▧</span><strong>Convertir imágenes</strong><small>PNG, JPG, WEBP y más*</small></button>
+        <button class="tool-card purple" data-view="archivos"><span class="tool-icon">▤</span><strong>Información</strong><small>Nombre, tipo y tamaño</small></button>
+        <button class="tool-card blue" data-view="hash"><span class="tool-icon">◇</span><strong>Hash SHA-256</strong><small>Verificar integridad</small></button>
+        <button class="tool-card pink" id="export-list"><span class="tool-icon">⇩</span><strong>Exportar listado</strong><small>Guardar CSV local</small></button>
+      </section>
+
+      <section class="workspace panel">
+        <div class="section-heading">
+          <div><h2 id="list-title">Archivos seleccionados</h2><p id="file-count">Todavía no has añadido archivos.</p></div>
+          <div class="section-actions"><button class="btn btn-quiet" id="clear-files">Limpiar</button></div>
+        </div>
+        <div class="empty-state" id="empty-state"><div class="empty-art">▱</div><strong>Tu espacio está listo</strong><span>Agrega archivos para comenzar a usar las herramientas.</span></div>
+        <div class="file-list" id="file-list" hidden></div>
+        <div class="status-line" id="status-line" role="status"><span class="status-led"></span><span>Listo para trabajar</span></div>
+      </section>
+      <footer><span>© Squirrel Doc</span><span>Hecho para trabajar en local · Sin instalación</span></footer>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
