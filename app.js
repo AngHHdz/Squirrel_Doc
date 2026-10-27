@@ -202,7 +202,7 @@
     const items = selected(); if (!items.length) return say('Selecciona archivos para calcular SHA-256.');
     if (!crypto.subtle) return say('SHA-256 requiere HTTPS o localhost en este navegador.');
     const rows=[];
-    for (const f of items) { const digest=await crypto.subtle.digest('SHA-256',await f.arrayBuffer()); rows.push(`${[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join(' ')}  ${f.name}`.replace(/ /g,'')); }
+    for (const f of items) { const digest=await crypto.subtle.digest('SHA-256',await f.arrayBuffer()); rows.push(`${[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('')}  ${f.name}`); }
     const text = rows.join('\r\n'); download(new Blob([text],{type:'text/plain;charset=utf-8'}),'squirrel-doc-sha256.txt'); say(`SHA-256 calculado para ${items.length} archivo(s).`);
   }
   function showDetails() {
