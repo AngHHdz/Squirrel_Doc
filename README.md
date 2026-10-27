@@ -19,14 +19,14 @@ Aplicación web estática para herramientas de archivos. Los archivos selecciona
 - Extraer archivos de ZIP como descargas separadas.
 
 ## Dependencias externas
-Las funciones PDF cargan PDF-lib 1.17.1 desde cdnjs bajo demanda. Las funciones ZIP cargan JSZip 3.10.1 desde cdnjs bajo demanda. La primera utilización de estas funciones requiere conectividad para descargar las bibliotecas. Los archivos del usuario se procesan en el navegador y no se suben a esos servicios. Para uso sin conexión, las bibliotecas deberán empaquetarse localmente y añadirse verificaciones de integridad.
+Las funciones PDF cargan PDF-lib 1.17.1 desde cdnjs bajo demanda. Las funciones ZIP cargan JSZip 3.10.1 desde cdnjs bajo demanda. OCR usa Tesseract.js 5 y datos de idioma descargados cuando se inicia; extracción de texto y OCR de PDF usan PDF.js. La primera utilización de estas funciones requiere conectividad para descargar las bibliotecas. Los archivos del usuario se procesan en el navegador y no se suben a esos servicios. Para uso sin conexión, las bibliotecas deberán empaquetarse localmente y añadirse verificaciones de integridad.
 
 ## Privacidad y límites
 - No hay servidor ni backend.
 - No se guardan archivos del usuario en Squirrel Doc.
 - El navegador controla las descargas y no permite acceso arbitrario a rutas locales.
 - La compatibilidad depende del navegador y del formato. Las conversiones de imagen usan APIs nativas del navegador.
-- PDF-lib no sustituye a un motor OCR y no garantiza una compresión PDF significativa. OCR, Office, audio/vídeo y conversión masiva avanzada todavía no están implementados.
+- PDF-lib no sustituye a un motor OCR y no garantiza una compresión PDF significativa. La conversión avanzada de Office y audio/vídeo todavía no está implementada. El OCR puede tardar bastante según la resolución y el equipo.
 
 ## Publicar
 Activa GitHub Pages desde **Settings → Pages → Deploy from a branch → main → /(root)**.
