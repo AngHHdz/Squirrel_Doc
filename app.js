@@ -198,11 +198,11 @@
     for (let n=1; n<=pdf.numPages; n++) {
       const page = await pdf.getPage(n); const content = await page.getTextContent();
       const text = content.items.map(item => item.str || '').join(' ');
-      chunks.push('--- Página '+n+' ---\\n'+text);
+      chunks.push('--- Página '+n+' ---\n'+text);
     }
-    const output = chunks.join('\\n\\n');
-    if (!output.replace(/[-\\s]/g,'').length) say('No se encontró texto seleccionable; prueba OCR de PDF escaneado.');
-    download(new Blob([output],{type:'text/plain;charset=utf-8'}), f.name.replace(/\\.pdf$/i,'')+'-texto.txt');
+    const output = chunks.join('\n\n');
+    if (!output.replace(/[-\s]/g,'').length) say('No se encontró texto seleccionable; prueba OCR de PDF escaneado.');
+    download(new Blob([output],{type:'text/plain;charset=utf-8'}), f.name.replace(/\.pdf$/i,'')+'-texto.txt');
     say('Texto de PDF exportado a TXT.');
   }
   async function runOcrOnImage(file, worker) {
@@ -216,8 +216,8 @@
     const worker = await Tesseract.createWorker(lang, 1, {logger: m => { if (m.status === 'recognizing text') status.textContent = 'OCR: '+Math.round((m.progress||0)*100)+'%'; }});
     try {
       const out=[];
-      for (const f of images) { say('Reconociendo texto: '+f.name); out.push('===== '+f.name+' =====\\n'+await runOcrOnImage(f,worker)); }
-      download(new Blob([out.join('\\n\\n')],{type:'text/plain;charset=utf-8'}),'squirrel-doc-ocr.txt');
+      for (const f of images) { say('Reconociendo texto: '+f.name); out.push('===== '+f.name+' =====\n'+await runOcrOnImage(f,worker)); }
+      download(new Blob([out.join('\n\n')],{type:'text/plain;charset=utf-8'}),'squirrel-doc-ocr.txt');
       say('OCR terminado para '+images.length+' imagen(es).');
     } finally { await worker.terminate(); }
   }
@@ -241,10 +241,10 @@
         await page.render({canvasContext:canvas.getContext('2d'),viewport}).promise;
         const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
         if (!blob) throw new Error('No se pudo renderizar la página '+(index+1));
-        out.push('===== Página '+(index+1)+' =====\\n'+(await worker.recognize(blob)).data.text);
+        out.push('===== Página '+(index+1)+' =====\n'+(await worker.recognize(blob)).data.text);
         canvas.width=1; canvas.height=1;
       }
-      download(new Blob([out.join('\\n\\n')],{type:'text/plain;charset=utf-8'}),f.name.replace(/\\.pdf$/i,'')+'-ocr.txt');
+      download(new Blob([out.join('\n\n')],{type:'text/plain;charset=utf-8'}),f.name.replace(/\.pdf$/i,'')+'-ocr.txt');
       say('OCR terminado en '+indices.length+' página(s).');
     } finally { await worker.terminate(); }
   }
@@ -316,7 +316,7 @@
       const fontSize = Math.max(22, Math.min(size.width, size.height) / 12);
       page.drawText(text.slice(0,120), {x:size.width*0.12,y:size.height*0.45,size:fontSize,font,color:rgb(0.48,0.52,0.58),opacity:0.22,rotate:degrees(-35),maxWidth:size.width*0.78});
     }
-    download(new Blob([await pdf.save()],{type:'application/pdf'}),f.name.replace(/\\.pdf$/i,'')+'-marca-agua.pdf');
+    download(new Blob([await pdf.save()],{type:'application/pdf'}),f.name.replace(/\.pdf$/i,'')+'-marca-agua.pdf');
     say('Se añadió la marca de agua. Revisa el resultado antes de usarlo como documento oficial.');
   }
   async function imagesToPdf() {
