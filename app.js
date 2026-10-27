@@ -61,7 +61,9 @@
     else if (currentView === 'pdf') {
       button('Unir PDF seleccionados', 'pdf-merge', !has);
       button('Extraer páginas de un PDF', 'pdf-extract', !has);
-      button('Girar páginas de un PDF', 'pdf-rotate', !has);
+      button('Girar página de PDF', 'pdf-rotate', !has);
+      button('Añadir marca de agua', 'pdf-watermark', !has);
+      button('Convertir imágenes a PDF', 'images-to-pdf', !has || !files.some(isImage));
     } else if (currentView === 'zip') {
       button('Crear ZIP con seleccionados', 'zip-create', !has);
       button('Extraer ZIP seleccionado', 'zip-extract', !has);
@@ -71,6 +73,8 @@
       button('Convertir imágenes a PNG', 'images', !has || !files.some(isImage));
       button('Comprimir imágenes a JPG', 'images-compress', !has || !files.some(isImage));
       button('Unir PDF', 'pdf-merge', !has);
+      button('Marca de agua PDF', 'pdf-watermark', !has);
+      button('Imágenes a PDF', 'images-to-pdf', !has || !files.some(isImage));
       button('Crear ZIP', 'zip-create', !has);
       button('Calcular SHA-256', 'hash', !has);
     }
@@ -222,6 +226,36 @@
     const page = pdf.getPage(pageNum-1); page.setRotation(pdfDegrees((page.getRotation().angle + degrees) % 360));
     download(new Blob([await pdf.save()],{type:'application/pdf'}),f.name.replace(/\.pdf$/i,'')+'-girado.pdf'); say(`Se giró la página ${pageNum}.`);
   }
+  async function watermarkPdf() {
+    const f = getPdfFiles()[0]; if (!f) return say('Selecciona un PDF.');
+    const text = prompt('Texto de la marca de agua:', 'CONFIDENCIAL'); if (!text) return;
+    const {PDFDocument, StandardFonts, rgb, degrees} = await getPdfLib();
+    const pdf = await PDFDocument.load(await f.arrayBuffer());
+    const font = await pdf.embedFont(StandardFonts.HelveticaBold);
+    for (const page of pdf.getPages()) {
+      const size = page.getSize();
+      const fontSize = Math.max(22, Math.min(size.width, size.height) / 12);
+      page.drawText(text.slice(0,120), {x:size.width*0.12,y:size.height*0.45,size:fontSize,font,color:rgb(0.48,0.52,0.58),opacity:0.22,rotate:degrees(-35),maxWidth:size.width*0.78});
+    }
+    download(new Blob([await pdf.save()],{type:'application/pdf'}),f.name.replace(/\\.pdf$/i,'')+'-marca-agua.pdf');
+    say('Se añadió la marca de agua. Revisa el resultado antes de usarlo como documento oficial.');
+  }
+  async function imagesToPdf() {
+    const images = selected().filter(isImage); if (!images.length) return say('Selecciona imágenes compatibles.');
+    const {PDFDocument} = await getPdfLib(); const pdf = await PDFDocument.create();
+    for (const f of images) {
+      const bitmap = await createImageBitmap(f);
+      const canvas = document.createElement('canvas'); canvas.width=bitmap.width; canvas.height=bitmap.height;
+      canvas.getContext('2d').drawImage(bitmap,0,0); bitmap.close();
+      const blob = await new Promise(resolve => canvas.toBlob(resolve,'image/png'));
+      if (!blob) throw new Error('No se pudo preparar la imagen '+f.name);
+      const embedded = await pdf.embedPng(await blob.arrayBuffer());
+      const page = pdf.addPage([embedded.width,embedded.height]);
+      page.drawImage(embedded,{x:0,y:0,width:embedded.width,height:embedded.height});
+    }
+    download(new Blob([await pdf.save()],{type:'application/pdf'}),'squirrel-doc-imagenes.pdf');
+    say('PDF creado con '+images.length+' imagen(es).');
+  }
   async function createZip() {
     const items = selected(); if (!items.length) return say('Selecciona archivos para crear un ZIP.');
     const JSZip = await getJSZip(); const zip = new JSZip();
@@ -264,6 +298,8 @@
       else if(action==='pdf-merge') await mergePdf();
       else if(action==='pdf-extract') await extractPdf();
       else if(action==='pdf-rotate') await rotatePdf();
+      else if(action==='pdf-watermark') await watermarkPdf();
+      else if(action==='images-to-pdf') await imagesToPdf();
       else if(action==='zip-create') await createZip();
       else if(action==='zip-extract') await extractZip();
       else if(action==='hash') await hashFiles();
