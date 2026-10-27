@@ -51,10 +51,16 @@
   function renderActions() {
     actionButtons.innerHTML = '';
     const has = files.length > 0;
-    actionTitle.textContent = ({inicio:'Acciones rápidas',convertir:'Conversión de imágenes',pdf:'Herramientas PDF',zip:'Archivos ZIP',archivos:'Información de archivos',hash:'Verificación SHA-256'})[currentView] || 'Acciones';
+    actionTitle.textContent = ({inicio:'Acciones rápidas',convertir:'Conversión de imágenes',pdf:'Herramientas PDF',ocr:'OCR y extracción de texto',zip:'Archivos ZIP',archivos:'Información de archivos',hash:'Verificación SHA-256'})[currentView] || 'Acciones';
     actionHint.textContent = has ? 'Marca los archivos que quieras procesar.' : 'Añade archivos primero.';
-    if (currentView === 'convertir') {
+    if (currentView === 'ocr') {
+      button('Extraer texto de PDF', 'pdf-text', !has || !files.some(isPdf));
+      button('OCR de imágenes', 'ocr-images', !has || !files.some(isImage));
+      button('OCR de PDF escaneado', 'ocr-pdf', !has || !files.some(isPdf));
+    } else if (currentView === 'convertir') {
       button('Convertir imágenes a PNG', 'images', !has || !files.some(isImage));
+      button('OCR de imágenes', 'ocr-images', !has || !files.some(isImage));
+      button('Extraer texto de PDF', 'pdf-text', !has || !files.some(isPdf));
       button('Comprimir imágenes a JPG', 'images-compress', !has || !files.some(isImage));
       button('Redimensionar imágenes', 'images-resize', !has || !files.some(isImage));
     }
@@ -74,6 +80,7 @@
       button('Comprimir imágenes a JPG', 'images-compress', !has || !files.some(isImage));
       button('Unir PDF', 'pdf-merge', !has);
       button('Marca de agua PDF', 'pdf-watermark', !has);
+      button('Extraer texto de PDF', 'pdf-text', !has || !files.some(isPdf));
       button('Imágenes a PDF', 'images-to-pdf', !has || !files.some(isImage));
       button('Crear ZIP', 'zip-create', !has);
       button('Calcular SHA-256', 'hash', !has);
@@ -88,7 +95,8 @@
       pdf:['Herramientas PDF.','Une documentos PDF, extrae páginas o gira el contenido de una página.'],
       zip:['Comprimir y extraer ZIP.','Crea paquetes ZIP o extrae su contenido en tu equipo.'],
       archivos:['Información de archivos.','Revisa nombre, tipo, tamaño y fecha de modificación.'],
-      hash:['Verificación SHA-256.','Calcula la huella criptográfica de archivos en tu navegador.']
+      hash:['Verificación SHA-256.','Calcula la huella criptográfica de archivos en tu navegador.'],
+      ocr:['OCR y extracción de texto.','Reconoce texto en imágenes o PDF escaneados y extrae texto seleccionable de PDF.']
     };
     document.querySelector('#page-title').textContent = names[view][0];
     document.querySelector('#page-subtitle').textContent = names[view][1];
@@ -168,6 +176,77 @@
       } catch (err) { say('No se pudo procesar ' + f.name + ': ' + err.message); }
     }
     if (done) say(done + ' imagen(es) procesadas correctamente.');
+  }
+  async function getPdfJs() {
+    if (window.pdfjsLib) return window.pdfjsLib;
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+    if (!window.pdfjsLib) throw new Error('No se pudo cargar PDF.js.');
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    return window.pdfjsLib;
+  }
+  async function getTesseract() {
+    if (window.Tesseract) return window.Tesseract;
+    await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js');
+    if (!window.Tesseract) throw new Error('No se pudo cargar Tesseract.js.');
+    return window.Tesseract;
+  }
+  async function extractPdfText() {
+    const f = getPdfFiles()[0]; if (!f) return say('Selecciona un PDF.');
+    const pdfjs = await getPdfJs();
+    const pdf = await pdfjs.getDocument({data: await f.arrayBuffer()}).promise;
+    const chunks = [];
+    for (let n=1; n<=pdf.numPages; n++) {
+      const page = await pdf.getPage(n); const content = await page.getTextContent();
+      const text = content.items.map(item => item.str || '').join(' ');
+      chunks.push('--- Página '+n+' ---\\n'+text);
+    }
+    const output = chunks.join('\\n\\n');
+    if (!output.replace(/[-\\s]/g,'').length) say('No se encontró texto seleccionable; prueba OCR de PDF escaneado.');
+    download(new Blob([output],{type:'text/plain;charset=utf-8'}), f.name.replace(/\\.pdf$/i,'')+'-texto.txt');
+    say('Texto de PDF exportado a TXT.');
+  }
+  async function runOcrOnImage(file, worker) {
+    const result = await worker.recognize(file);
+    return result.data.text || '';
+  }
+  async function ocrImages() {
+    const images = selected().filter(isImage); if (!images.length) return say('Selecciona imágenes.');
+    const Tesseract = await getTesseract();
+    const lang = (prompt('Idioma OCR: spa, eng o spa+eng','spa+eng') || 'spa+eng').trim();
+    const worker = await Tesseract.createWorker(lang, 1, {logger: m => { if (m.status === 'recognizing text') status.textContent = 'OCR: '+Math.round((m.progress||0)*100)+'%'; }});
+    try {
+      const out=[];
+      for (const f of images) { say('Reconociendo texto: '+f.name); out.push('===== '+f.name+' =====\\n'+await runOcrOnImage(f,worker)); }
+      download(new Blob([out.join('\\n\\n')],{type:'text/plain;charset=utf-8'}),'squirrel-doc-ocr.txt');
+      say('OCR terminado para '+images.length+' imagen(es).');
+    } finally { await worker.terminate(); }
+  }
+  async function ocrPdf() {
+    const f = getPdfFiles()[0]; if (!f) return say('Selecciona un PDF.');
+    const pdfjs = await getPdfJs();
+    const pdf = await pdfjs.getDocument({data: await f.arrayBuffer()}).promise;
+    const range = prompt('Páginas para OCR (ej. 1-3). Máximo recomendado: 10 páginas por ejecución.', '1-'+Math.min(pdf.numPages,3));
+    if (!range) return;
+    const indices=parsePages(range,pdf.numPages).slice(0,10);
+    if (!indices.length) return say('No se indicaron páginas válidas.');
+    const Tesseract = await getTesseract();
+    const lang = (prompt('Idioma OCR: spa, eng o spa+eng','spa+eng') || 'spa+eng').trim();
+    const worker = await Tesseract.createWorker(lang,1,{logger:m=>{if(m.status==='recognizing text')status.textContent='OCR: '+Math.round((m.progress||0)*100)+'%';}});
+    try {
+      const out=[];
+      for (const index of indices) {
+        say('Renderizando página '+(index+1)+' de '+pdf.numPages+' para OCR…');
+        const page=await pdf.getPage(index+1); const viewport=page.getViewport({scale:1.5});
+        const canvas=document.createElement('canvas'); canvas.width=Math.ceil(viewport.width); canvas.height=Math.ceil(viewport.height);
+        await page.render({canvasContext:canvas.getContext('2d'),viewport}).promise;
+        const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+        if (!blob) throw new Error('No se pudo renderizar la página '+(index+1));
+        out.push('===== Página '+(index+1)+' =====\\n'+(await worker.recognize(blob)).data.text);
+        canvas.width=1; canvas.height=1;
+      }
+      download(new Blob([out.join('\\n\\n')],{type:'text/plain;charset=utf-8'}),f.name.replace(/\\.pdf$/i,'')+'-ocr.txt');
+      say('OCR terminado en '+indices.length+' página(s).');
+    } finally { await worker.terminate(); }
   }
   async function getPdfLib() {
     if (window.PDFLib) return window.PDFLib;
@@ -295,6 +374,9 @@
       if(action==='images') await processImages('convert');
       else if(action==='images-compress') await processImages('compress');
       else if(action==='images-resize') await processImages('resize');
+      else if(action==='pdf-text') await extractPdfText();
+      else if(action==='ocr-images') await ocrImages();
+      else if(action==='ocr-pdf') await ocrPdf();
       else if(action==='pdf-merge') await mergePdf();
       else if(action==='pdf-extract') await extractPdf();
       else if(action==='pdf-rotate') await rotatePdf();
