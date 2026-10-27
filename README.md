@@ -13,6 +13,8 @@ Aplicación web estática para herramientas de archivos. Los archivos selecciona
 - Unir varios PDF.
 - Extraer un rango/lista de páginas de un PDF a un PDF nuevo.
 - Girar una página de un PDF.
+- Añadir marca de agua de texto a las páginas de un PDF.
+- Convertir imágenes seleccionadas a un PDF (una imagen por página).
 - Crear ZIP con archivos seleccionados.
 - Extraer archivos de ZIP como descargas separadas.
 
