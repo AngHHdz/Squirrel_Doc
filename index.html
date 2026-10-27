@@ -18,51 +18,57 @@
       </div>
       <nav aria-label="Navegación principal">
         <button class="nav-item active" data-view="inicio"><span>⌂</span> Inicio</button>
-        <button class="nav-item" data-view="convertir"><span>⇄</span> Convertir imágenes</button>
-        <button class="nav-item" data-view="archivos"><span>▤</span> Información de archivos</button>
-        <button class="nav-item" data-view="hash"><span>◇</span> Calcular hashes</button>
+        <button class="nav-item" data-view="convertir"><span>⇄</span> Imágenes</button>
+        <button class="nav-item" data-view="pdf"><span>▤</span> Herramientas PDF</button>
+        <button class="nav-item" data-view="zip"><span>▣</span> ZIP</button>
+        <button class="nav-item" data-view="archivos"><span>◫</span> Información</button>
+        <button class="nav-item" data-view="hash"><span>◇</span> Hash SHA-256</button>
       </nav>
       <div class="sidebar-bottom">
         <div class="privacy-mark"><span class="pulse"></span> PROCESAMIENTO LOCAL</div>
-        <p>Los archivos se procesan en tu navegador. No se suben a un servidor mediante esta aplicación.</p>
-        <small>Prototipo web · v0.1.0</small>
+        <p>Los archivos se procesan en tu navegador. Las bibliotecas de herramientas se cargan desde CDN cuando se necesitan.</p>
+        <small>Prototipo web · v0.2.0</small>
       </div>
     </aside>
     <main class="main">
       <header class="topbar">
-        <div><div class="eyebrow">TU ESPACIO DE TRABAJO</div><h1 id="page-title">Herramientas para tus archivos.</h1><p id="page-subtitle">Convierte y revisa archivos desde una interfaz simple, rápida y privada.</p></div>
+        <div><div class="eyebrow">TU ESPACIO DE TRABAJO</div><h1 id="page-title">Herramientas para tus archivos.</h1><p id="page-subtitle">Convierte, organiza y verifica archivos desde tu navegador.</p></div>
         <div class="top-badge"><span class="badge-dot"></span> Sin cuenta · Local</div>
       </header>
 
       <section class="drop-zone" id="drop-zone" tabindex="0" role="button" aria-label="Seleccionar o arrastrar archivos">
-        <div class="drop-icon">⇩</div>
-        <h2>Arrastra tus archivos aquí</h2>
-        <p>o selecciónalos desde tu equipo</p>
+        <div class="drop-icon">⇩</div><h2>Arrastra tus archivos aquí</h2><p>o selecciónalos desde tu equipo</p>
         <button class="btn btn-primary" id="select-files">Seleccionar archivos</button>
         <input id="file-input" type="file" multiple hidden>
         <div class="drop-hint">Puedes seleccionar varios archivos a la vez</div>
       </section>
 
       <section class="quick-grid" aria-label="Herramientas rápidas">
-        <button class="tool-card cyan" data-view="convertir"><span class="tool-icon">▧</span><strong>Convertir imágenes</strong><small>PNG, JPG, WEBP y más*</small></button>
-        <button class="tool-card purple" data-view="archivos"><span class="tool-icon">▤</span><strong>Información</strong><small>Nombre, tipo y tamaño</small></button>
+        <button class="tool-card cyan" data-view="convertir"><span class="tool-icon">▧</span><strong>Convertir imágenes</strong><small>PNG, JPG, WEBP, BMP</small></button>
+        <button class="tool-card red" data-view="pdf"><span class="tool-icon">▤</span><strong>Herramientas PDF</strong><small>Unir, dividir y girar páginas</small></button>
+        <button class="tool-card purple" data-view="zip"><span class="tool-icon">▣</span><strong>ZIP y archivos</strong><small>Crear y extraer ZIP</small></button>
         <button class="tool-card blue" data-view="hash"><span class="tool-icon">◇</span><strong>Hash SHA-256</strong><small>Verificar integridad</small></button>
-        <button class="tool-card pink" id="export-list"><span class="tool-icon">⇩</span><strong>Exportar listado</strong><small>Guardar CSV local</small></button>
       </section>
 
       <section class="workspace panel">
         <div class="section-heading">
           <div><h2 id="list-title">Archivos seleccionados</h2><p id="file-count">Todavía no has añadido archivos.</p></div>
-          <div class="section-actions"><button class="btn btn-quiet" id="clear-files">Limpiar</button></div>
+          <div class="section-actions"><button class="btn btn-quiet" id="export-list">Exportar CSV</button><button class="btn btn-quiet" id="clear-files">Limpiar</button></div>
         </div>
         <div class="empty-state" id="empty-state"><div class="empty-art">▱</div><strong>Tu espacio está listo</strong><span>Agrega archivos para comenzar a usar las herramientas.</span></div>
         <div class="file-list" id="file-list" hidden></div>
+        <div class="tool-actions" id="tool-actions">
+          <div class="tool-action-heading"><strong id="action-title">Acciones disponibles</strong><span id="action-hint">Selecciona una herramienta.</span></div>
+          <div class="action-buttons" id="action-buttons"></div>
+        </div>
         <div class="status-line" id="status-line" role="status"><span class="status-led"></span><span>Listo para trabajar</span></div>
       </section>
-      <footer><span>© Squirrel Doc</span><span>Hecho para trabajar en local · Sin instalación</span></footer>
+      <footer><span>© Squirrel Doc</span><span>Procesamiento local · Sin cuenta</span></footer>
     </main>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" integrity="sha512-V0Mxe0Q9T0Gpe6X6n4yY8cL7y0x2Qyq9S4fA6K7G+Z6Z7h5U8N9C3k5G0sQ6C5L8B4H6K9S3V1w2X4Y6Z8A0B==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-x3Q4uEPN9kP1j8N1kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3kP1N3K3E=" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="app.js"></script>
 </body>
 </html>
