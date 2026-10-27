@@ -1,24 +1,22 @@
-# Squirrel Doc Web — prototipo 0.1.0
+# Squirrel Doc Web
 
-Interfaz web estática en español para gestión local de archivos.
+Aplicación web estática para herramientas de archivos, con procesamiento en el navegador.
 
-## Funciones actuales
-- Interfaz responsive con mascota suministrada.
+## Funciones
 - Selección múltiple y arrastrar/soltar.
-- Conversión de imágenes compatibles a PNG mediante Canvas.
-- Exportación del listado a CSV.
-- Estructura visual para información y hash SHA-256.
+- Conversión de imágenes compatibles a PNG.
+- Información básica de archivos y exportación de listado CSV.
+- Hash SHA-256.
+- Herramientas PDF locales: organizar páginas, extraer páginas y exportar páginas como imágenes (en desarrollo progresivo).
+- Creación y extracción de archivos ZIP en el navegador.
 
-## Limitaciones del prototipo
-- No hay servidor ni backend; los archivos se procesan en el navegador.
-- La compatibilidad de conversión depende del navegador y del formato.
-- La función hash puede requerir contexto seguro (HTTPS o localhost).
-- No incluye todavía PDF, OCR, Office, audio/vídeo, ni creación de ZIP.
-- El CSS importa una fuente de Google Fonts; para modo totalmente offline elimina esa línea y utiliza las fuentes de sistema.
-- Esta versión no guarda ni sube archivos de usuario.
+## Privacidad y límites
+Los archivos seleccionados se procesan en el navegador y no se envían a un servidor de Squirrel Doc. Para habilitar algunas herramientas se cargan bibliotecas JavaScript de terceros desde CDN cuando se necesita la función; el navegador necesita conexión para descargarlas la primera vez. Si necesitas operar totalmente sin conexión, habría que empaquetar esas bibliotecas dentro del repositorio y probar GitHub Pages/PWA por separado.
 
-## Publicar en GitHub Pages
-Sube el contenido de esta carpeta a la raíz de un repositorio y activa Settings → Pages → Deploy from a branch → main → /(root).
+El navegador no puede acceder libremente a todas las rutas del disco ni sobrescribir archivos sin una acción explícita del usuario. Las descargas se realizan mediante el diálogo normal del navegador.
 
-## Siguiente etapa
-Añadir herramientas PDF con una biblioteca local revisada, compresión ZIP con una biblioteca empaquetada, y pruebas de seguridad y compatibilidad.
+## Publicar
+Activa GitHub Pages desde **Settings → Pages → Deploy from a branch → main → /(root)**.
+
+## Estado
+Prototipo en crecimiento. Las funciones deben validarse en Chrome/Edge y con archivos reales. La disponibilidad y fidelidad de la conversión dependen del formato, navegador y bibliotecas usadas.
