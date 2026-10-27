@@ -1,22 +1,33 @@
 # Squirrel Doc Web
 
-Aplicación web estática para herramientas de archivos, con procesamiento en el navegador.
+Aplicación web estática para herramientas de archivos. Los archivos seleccionados se procesan en el navegador; no se envían a un backend de Squirrel Doc.
 
-## Funciones
-- Selección múltiple y arrastrar/soltar.
+## Funciones disponibles en el prototipo
+- Selección múltiple y arrastrar/soltar archivos.
 - Conversión de imágenes compatibles a PNG.
-- Información básica de archivos y exportación de listado CSV.
-- Hash SHA-256.
-- Herramientas PDF locales: organizar páginas, extraer páginas y exportar páginas como imágenes (en desarrollo progresivo).
-- Creación y extracción de archivos ZIP en el navegador.
+- Compresión de imágenes a JPEG con control de calidad.
+- Redimensionado de imágenes con límites de ancho y alto.
+- Exportación de listado a CSV.
+- Exportación de metadatos básicos a TXT.
+- Cálculo de hashes SHA-256.
+- Unir varios PDF.
+- Extraer un rango/lista de páginas de un PDF a un PDF nuevo.
+- Girar una página de un PDF.
+- Crear ZIP con archivos seleccionados.
+- Extraer archivos de ZIP como descargas separadas.
+
+## Dependencias externas
+Las funciones PDF cargan PDF-lib 1.17.1 desde cdnjs bajo demanda. Las funciones ZIP cargan JSZip 3.10.1 desde cdnjs bajo demanda. La primera utilización de estas funciones requiere conectividad para descargar las bibliotecas. Los archivos del usuario se procesan en el navegador y no se suben a esos servicios. Para uso sin conexión, las bibliotecas deberán empaquetarse localmente y añadirse verificaciones de integridad.
 
 ## Privacidad y límites
-Los archivos seleccionados se procesan en el navegador y no se envían a un servidor de Squirrel Doc. Para habilitar algunas herramientas se cargan bibliotecas JavaScript de terceros desde CDN cuando se necesita la función; el navegador necesita conexión para descargarlas la primera vez. Si necesitas operar totalmente sin conexión, habría que empaquetar esas bibliotecas dentro del repositorio y probar GitHub Pages/PWA por separado.
-
-El navegador no puede acceder libremente a todas las rutas del disco ni sobrescribir archivos sin una acción explícita del usuario. Las descargas se realizan mediante el diálogo normal del navegador.
+- No hay servidor ni backend.
+- No se guardan archivos del usuario en Squirrel Doc.
+- El navegador controla las descargas y no permite acceso arbitrario a rutas locales.
+- La compatibilidad depende del navegador y del formato. Las conversiones de imagen usan APIs nativas del navegador.
+- PDF-lib no sustituye a un motor OCR y no garantiza una compresión PDF significativa. OCR, Office, audio/vídeo y conversión masiva avanzada todavía no están implementados.
 
 ## Publicar
 Activa GitHub Pages desde **Settings → Pages → Deploy from a branch → main → /(root)**.
 
-## Estado
-Prototipo en crecimiento. Las funciones deben validarse en Chrome/Edge y con archivos reales. La disponibilidad y fidelidad de la conversión dependen del formato, navegador y bibliotecas usadas.
+## Pruebas recomendadas
+Probar en versiones actuales de Chrome y Edge con imágenes transparentes, imágenes grandes, PDF protegido/normal, PDF multipágina y ZIP con carpetas. Revisar las herramientas del navegador para confirmar que no se producen solicitudes con contenido de archivos.
