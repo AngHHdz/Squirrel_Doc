@@ -159,7 +159,7 @@
         const blob = await new Promise(resolve => canvas.toBlob(resolve, mime, quality));
         if (!blob) throw new Error('El navegador no pudo generar el archivo de salida.');
         const suffix = mode === 'compress' ? '-comprimido.jpg' : mode === 'resize' ? '-redimensionado.png' : '.png';
-        const filename = mode === 'convert' ? f.name.replace(/\\.[^.]+$/,'') + '.png' : f.name.replace(/\\.[^.]+$/,'') + suffix;
+        const filename = mode === 'convert' ? f.name.replace(/\.[^.]+$/,'') + '.png' : f.name.replace(/\.[^.]+$/,'') + suffix;
         download(blob, filename); done++;
       } catch (err) { say('No se pudo procesar ' + f.name + ': ' + err.message); }
     }
