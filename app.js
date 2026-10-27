@@ -53,7 +53,11 @@
     const has = files.length > 0;
     actionTitle.textContent = ({inicio:'Acciones rápidas',convertir:'Conversión de imágenes',pdf:'Herramientas PDF',zip:'Archivos ZIP',archivos:'Información de archivos',hash:'Verificación SHA-256'})[currentView] || 'Acciones';
     actionHint.textContent = has ? 'Marca los archivos que quieras procesar.' : 'Añade archivos primero.';
-    if (currentView === 'convertir') button('Convertir imágenes seleccionadas a PNG', 'images', !has || !files.some(isImage));
+    if (currentView === 'convertir') {
+      button('Convertir imágenes a PNG', 'images', !has || !files.some(isImage));
+      button('Comprimir imágenes a JPG', 'images-compress', !has || !files.some(isImage));
+      button('Redimensionar imágenes', 'images-resize', !has || !files.some(isImage));
+    }
     else if (currentView === 'pdf') {
       button('Unir PDF seleccionados', 'pdf-merge', !has);
       button('Extraer páginas de un PDF', 'pdf-extract', !has);
@@ -65,6 +69,7 @@
     else if (currentView === 'archivos') button('Mostrar detalles seleccionados', 'details', !has);
     else {
       button('Convertir imágenes a PNG', 'images', !has || !files.some(isImage));
+      button('Comprimir imágenes a JPG', 'images-compress', !has || !files.some(isImage));
       button('Unir PDF', 'pdf-merge', !has);
       button('Crear ZIP', 'zip-create', !has);
       button('Calcular SHA-256', 'hash', !has);
@@ -120,6 +125,45 @@
       } catch (err) { say(`No se pudo convertir ${f.name}: ${err.message}`); }
     }
     if (done) say(`Se convirtieron ${done} imagen(es) a PNG.`);
+  }
+  async function processImages(mode) {
+    const items = selected().filter(isImage);
+    if (!items.length) return say('Selecciona al menos una imagen compatible.');
+    let maxWidth = null, maxHeight = null, quality = 0.78;
+    if (mode === 'resize') {
+      maxWidth = Number(prompt('Ancho máximo en píxeles (0 para conservar el ancho):', '1600'));
+      maxHeight = Number(prompt('Alto máximo en píxeles (0 para conservar el alto):', '1600'));
+      if (!Number.isFinite(maxWidth) || !Number.isFinite(maxHeight) || maxWidth < 0 || maxHeight < 0 || (maxWidth === 0 && maxHeight === 0)) return say('Indica medidas válidas mayores o iguales a cero.');
+    }
+    if (mode === 'compress') {
+      quality = Number(prompt('Calidad JPEG entre 0.1 y 1 (más bajo = archivo más pequeño):', '0.78'));
+      if (!Number.isFinite(quality) || quality < 0.1 || quality > 1) return say('La calidad debe estar entre 0.1 y 1.');
+    }
+    let done = 0;
+    for (const f of items) {
+      try {
+        const bitmap = await createImageBitmap(f);
+        let scale = 1;
+        if (mode === 'resize') {
+          const sx = maxWidth > 0 ? maxWidth / bitmap.width : 1;
+          const sy = maxHeight > 0 ? maxHeight / bitmap.height : 1;
+          scale = Math.min(1, sx, sy);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+        const ctx = canvas.getContext('2d', { alpha: mode !== 'compress' });
+        if (mode === 'compress') { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+        ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height); bitmap.close();
+        const mime = mode === 'compress' ? 'image/jpeg' : 'image/png';
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, mime, quality));
+        if (!blob) throw new Error('El navegador no pudo generar el archivo de salida.');
+        const suffix = mode === 'compress' ? '-comprimido.jpg' : mode === 'resize' ? '-redimensionado.png' : '.png';
+        const filename = mode === 'convert' ? f.name.replace(/\\.[^.]+$/,'') + '.png' : f.name.replace(/\\.[^.]+$/,'') + suffix;
+        download(blob, filename); done++;
+      } catch (err) { say('No se pudo procesar ' + f.name + ': ' + err.message); }
+    }
+    if (done) say(done + ' imagen(es) procesadas correctamente.');
   }
   async function getPdfLib() {
     if (window.PDFLib) return window.PDFLib;
@@ -214,7 +258,9 @@
     const b = e.target.closest('button[data-tool]'); if (!b || b.disabled) return;
     const action=b.dataset.tool; b.disabled=true; const old=b.textContent; b.textContent='Procesando…';
     try {
-      if(action==='images') await convertImages();
+      if(action==='images') await processImages('convert');
+      else if(action==='images-compress') await processImages('compress');
+      else if(action==='images-resize') await processImages('resize');
       else if(action==='pdf-merge') await mergePdf();
       else if(action==='pdf-extract') await extractPdf();
       else if(action==='pdf-rotate') await rotatePdf();
